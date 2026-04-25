@@ -1,0 +1,85 @@
+<Window x:Class="PsobbLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PSOBB.IO" Height="450" Width="1000"
+        Icon="PSOBBIO_icon.ico"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Background="#1E1E1E">
+    
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>   <!-- Sidebar Image -->
+            <ColumnDefinition Width="250"/> <!-- Main Content -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar Art -->
+        <Image Source="PSOBBIObanner.png" Stretch="UniformToFill" Grid.Column="0"/>
+        
+        <!-- Drag Handle for Sidebar -->
+        <Border Background="Transparent" Grid.Column="0" MouseDown="TitleBar_MouseDown"/>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Title/Header -->
+                <RowDefinition Height="*"/>    <!-- Spacer -->
+                <RowDefinition Height="Auto"/> <!-- Buttons -->
+            </Grid.RowDefinitions>
+
+            <!-- Custom Drag Handle for Main Area -->
+            <Border Background="Transparent" Grid.Row="0" Height="40" VerticalAlignment="Top" Margin="-20,-20,-20,0" MouseDown="TitleBar_MouseDown">
+                <Button Content="X" HorizontalAlignment="Right" Width="40" Background="Transparent" Foreground="#888" BorderThickness="0" FontSize="16" Click="CloseButton_Click" WindowChrome.IsHitTestVisibleInChrome="True"/>
+            </Border>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,30,0,0">
+                <TextBlock Text="PSOBB.IO" FontSize="28" FontWeight="Bold" Foreground="White">
+                    <TextBlock.Effect>
+                         <DropShadowEffect Color="#00A8E8" BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="PHANTASY STAR ONLINE BLUE BURST" FontSize="10" Foreground="#777" Margin="2,0,0,0"/>
+            </StackPanel>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
+                <Button Content="LAUNCH GAME" Cursor="Hand" Height="60" FontSize="20" FontWeight="Bold" Background="#00A8E8" Foreground="White" BorderThickness="0" Click="LaunchButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <Grid Margin="0,15,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Content="CONFIGURATION" Height="40" Background="#333" Foreground="#CCC" BorderThickness="0" Click="SettingsButton_Click">
+                         <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="5"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    
+                    <Button Grid.Column="2" Content="WEBSITE" Height="40" Background="#333" Foreground="#CCC" BorderThickness="0" Click="WebsiteButton_Click">
+                         <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="5"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+                
+                <TextBlock Text="v1.0.0 | psobb.io" Foreground="#444" HorizontalAlignment="Center" Margin="0,20,0,0" FontSize="10"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
