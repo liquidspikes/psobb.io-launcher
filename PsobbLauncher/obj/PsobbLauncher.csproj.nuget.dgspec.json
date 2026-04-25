@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\liqui\\git\\Blue-Burst-Patch-Project\\PsobbLauncher\\PsobbLauncher.csproj": {}
+    "C:\\Users\\liqui\\git\\PsobbLauncher\\PsobbLauncher\\PsobbLauncher.csproj": {}
   },
   "projects": {
-    "C:\\Users\\liqui\\git\\Blue-Burst-Patch-Project\\PsobbLauncher\\PsobbLauncher.csproj": {
-      "version": "1.1.0",
+    "C:\\Users\\liqui\\git\\PsobbLauncher\\PsobbLauncher\\PsobbLauncher.csproj": {
+      "version": "1.0.1",
       "restore": {
-        "projectUniqueName": "C:\\Users\\liqui\\git\\Blue-Burst-Patch-Project\\PsobbLauncher\\PsobbLauncher.csproj",
+        "projectUniqueName": "C:\\Users\\liqui\\git\\PsobbLauncher\\PsobbLauncher\\PsobbLauncher.csproj",
         "projectName": "PsobbLauncher",
-        "projectPath": "C:\\Users\\liqui\\git\\Blue-Burst-Patch-Project\\PsobbLauncher\\PsobbLauncher.csproj",
+        "projectPath": "C:\\Users\\liqui\\git\\PsobbLauncher\\PsobbLauncher\\PsobbLauncher.csproj",
         "packagesPath": "C:\\Users\\liqui\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\liqui\\git\\Blue-Burst-Patch-Project\\PsobbLauncher\\obj\\",
+        "outputPath": "C:\\Users\\liqui\\git\\PsobbLauncher\\PsobbLauncher\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "S:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -22,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net472"
+          "net8.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net472": {
-            "targetAlias": "net472",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -44,17 +44,54 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
-        "net472": {
-          "targetAlias": "net472",
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103\\RuntimeIdentifierGraph.json"
-        }
-      },
-      "runtimes": {
-        "win-x86": {
-          "#import": []
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Avalonia": {
+              "target": "Package",
+              "version": "[11.0.10, )"
+            },
+            "Avalonia.Desktop": {
+              "target": "Package",
+              "version": "[11.0.10, )"
+            },
+            "Avalonia.Diagnostics": {
+              "target": "Package",
+              "version": "[11.0.10, )"
+            },
+            "Avalonia.Fonts.Inter": {
+              "target": "Package",
+              "version": "[11.0.10, )"
+            },
+            "Avalonia.Themes.Fluent": {
+              "target": "Package",
+              "version": "[11.0.10, )"
+            },
+            "Microsoft.Win32.Registry": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
