@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PsobbLauncher.ModsWindow"
+        Title="Mod Manager" Height="600" Width="800"
+        WindowStartupLocation="CenterOwner" Background="#1E1E1E"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#222" Grid.Row="0" PointerPressed="TitleBar_PointerPressed" Padding="20,10">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
+                    <TextBlock Text="MOD MANAGER" FontSize="20" FontWeight="Bold" Foreground="#00ffcc" VerticalAlignment="Center"/>
+                    <TextBlock Text="(Double-click to install/uninstall)" Foreground="#888" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+                <Button Content="X" HorizontalAlignment="Right" Background="Transparent" Foreground="#888" BorderThickness="0" FontSize="16" Click="CloseButton_Click" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column: Search & List -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBox x:Name="SearchBox" Grid.Row="0" Watermark="Search mods..." Margin="0,0,0,10" Background="#2A2A2A" Foreground="White" BorderBrush="#444" KeyUp="SearchBox_KeyUp"/>
+                
+                <ListBox x:Name="ModsListBox" Grid.Row="1" Background="#2A2A2A" Foreground="White" BorderThickness="1" BorderBrush="#444" CornerRadius="5" SelectionChanged="ModsListBox_SelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Small Thumbnail in List -->
+                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="4" ClipToBounds="True" Margin="0,0,10,0" Background="#111">
+                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
+                                </Border>
+                                
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding Category}" FontSize="11" Foreground="#aaa"/>
+                                </StackPanel>
+                                
+                                <!-- Visual indicator for installation status -->
+                                <TextBlock Grid.Column="2" Text="{Binding StatusText}" Foreground="{Binding StatusColor}" VerticalAlignment="Center" FontSize="10" FontWeight="Bold"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <!-- Mod Details -->
+            <Border Grid.Column="2" Background="#2A2A2A" BorderBrush="#444" BorderThickness="1" CornerRadius="5" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer Grid.Row="0">
+                        <StackPanel x:Name="DetailsPanel" Spacing="10">
+                            <TextBlock Text="Select a mod to view details." Foreground="#888" HorizontalAlignment="Center" Margin="0,50,0,0" x:Name="SelectPromptText"/>
+                            
+                            <StackPanel x:Name="ModInfoPanel" IsVisible="False" Spacing="10">
+                                <!-- Large Thumbnail in Details -->
+                                <Border Height="180" CornerRadius="5" ClipToBounds="True" Background="#111" Margin="0,0,0,10">
+                                    <Image x:Name="ModDetailsImage" Stretch="UniformToFill"/>
+                                </Border>
+                                
+                                <TextBlock x:Name="ModTitleText" FontSize="22" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="ModAuthorText" Foreground="#00ffcc" FontSize="14"/>
+                                <TextBlock x:Name="ModVersionText" Foreground="#aaa" FontSize="12"/>
+                                <TextBlock x:Name="ModSizeText" Foreground="#aaa" FontSize="12"/>
+                                <TextBlock x:Name="ModRatingText" Foreground="#ffca28" FontSize="12"/>
+                                
+                                <Border Height="1" Background="#444" Margin="0,5"/>
+                                
+                                <TextBlock Text="Description:" FontWeight="Bold" Foreground="#ccc"/>
+                                <TextBlock x:Name="ModDescText" Foreground="White" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="1" Spacing="10" Margin="0,15,0,0">
+                        <Grid IsVisible="{Binding #DownloadProgressBar.IsVisible}">
+                            <ProgressBar x:Name="DownloadProgressBar" Height="8" Minimum="0" Maximum="100" CornerRadius="4" Foreground="#00ffcc" Background="#111"/>
+                            <TextBlock x:Name="DownloadProgressText" Text="0%" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="White" FontWeight="Bold"/>
+                        </Grid>
+                        
+                        <TextBlock x:Name="StatusMessageText" Foreground="#aaa" FontSize="12" HorizontalAlignment="Center"/>
+                        
+                        <Button x:Name="ActionBtn" Content="Install Mod" Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="False" Click="ActionBtn_Click" Height="40" FontSize="16" FontWeight="Bold" CornerRadius="5"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
