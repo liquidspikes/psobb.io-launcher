@@ -382,7 +382,7 @@ namespace PsobbLauncher
             _gamepadTimer.Start();
         }
 
-        private void GamepadTimer_Tick(object sender, EventArgs e)
+        private void GamepadTimer_Tick(object? sender, EventArgs e)
         {
             try
             {
