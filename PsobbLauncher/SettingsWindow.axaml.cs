@@ -1,13 +1,14 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PsobbLauncher
 {
@@ -197,7 +198,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error loading settings: " + ex.Message);
+                Debug.WriteLine("Error loading settings: " + ex.Message);
             }
         }
 
@@ -314,7 +315,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error saving: " + ex.Message);
+                Debug.WriteLine("Error saving: " + ex.Message);
             }
         }
 
@@ -357,7 +358,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-               Console.WriteLine("Framework apply error: " + ex.Message);
+                Debug.WriteLine("Framework apply error: " + ex.Message);
             }
         }
 
@@ -457,16 +458,14 @@ namespace PsobbLauncher
                 _lastInputTime = DateTime.Now;
         }
 
+        /// <summary>
+        /// Placeholder for gamepad-driven focus navigation.
+        /// Avalonia 11 does not expose a simple programmatic focus-move API like WPF,
+        /// so this currently relies on the framework's built-in keyboard navigation.
+        /// </summary>
         private void MoveFocus(NavigationDirection direction)
         {
-            var fm = TopLevel.GetTopLevel(this)?.FocusManager;
-            if (fm != null)
-            {
-                // Simple workaround for gamepad movement focus
-                // This doesn't actually move focus as easily as WPF in Avalonia 11
-                // We'd usually use fm.GetFocusedElement() and ask the visual tree for next
-                // But for now, we just leave it simple as the default keyboard nav works automatically.
-            }
+            // Intentional no-op — Avalonia's default keyboard navigation handles this.
         }
     }
 

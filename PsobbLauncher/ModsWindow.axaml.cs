@@ -1,13 +1,14 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace PsobbLauncher
 {
-    public class ModItem : Avalonia.Data.Core.INotifyPropertyChanged
+    public class ModItem : System.ComponentModel.INotifyPropertyChanged
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
@@ -41,7 +42,7 @@ namespace PsobbLauncher
                 if (_thumbnail != value)
                 {
                     _thumbnail = value;
-                    PropertyChanged?.Invoke(this, new Avalonia.Data.Core.PropertyChangedEventArgs(nameof(Thumbnail)));
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Thumbnail)));
                 }
             }
         }
@@ -55,17 +56,17 @@ namespace PsobbLauncher
                 if (_isInstalled != value)
                 {
                     _isInstalled = value;
-                    PropertyChanged?.Invoke(this, new Avalonia.Data.Core.PropertyChangedEventArgs(nameof(IsInstalled)));
-                    PropertyChanged?.Invoke(this, new Avalonia.Data.Core.PropertyChangedEventArgs(nameof(StatusText)));
-                    PropertyChanged?.Invoke(this, new Avalonia.Data.Core.PropertyChangedEventArgs(nameof(StatusColor)));
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsInstalled)));
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(StatusText)));
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(StatusColor)));
                 }
             }
         }
 
-        public string StatusText => IsInstalled ? "INSTALLED" : "";
+        public string StatusText => IsInstalled ? "ENABLED" : "";
         public IBrush StatusColor => IsInstalled ? new SolidColorBrush(Color.Parse("#00ffcc")) : Brushes.Transparent;
 
-        public event EventHandler<Avalonia.Data.Core.PropertyChangedEventArgs>? PropertyChanged;
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
     }
 
     public class InstalledModState
@@ -73,6 +74,7 @@ namespace PsobbLauncher
         public string Id { get; set; } = "";
         public string Version { get; set; } = "";
         public List<string> Files { get; set; } = new List<string>();
+        public List<string> BackedUpFiles { get; set; } = new List<string>();
     }
 
     public partial class ModsWindow : Window
@@ -122,7 +124,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to load mod state: " + ex.Message);
+                Debug.WriteLine("Failed to load mod state: " + ex.Message);
             }
         }
 
@@ -136,7 +138,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to save mod state: " + ex.Message);
+                Debug.WriteLine("Failed to save mod state: " + ex.Message);
             }
         }
 
@@ -168,6 +170,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Failed to load mods: " + ex.Message);
                 StatusMessageText.Text = "Could not connect to mod server.";
             }
         }
@@ -223,7 +226,7 @@ namespace PsobbLauncher
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to load thumbnail for {mod.Id}: {ex.Message}");
+                    Debug.WriteLine($"Failed to load thumbnail for {mod.Id}: {ex.Message}");
                 }
             }
         }
@@ -258,12 +261,12 @@ namespace PsobbLauncher
         {
             if (mod.IsInstalled)
             {
-                ActionBtn.Content = "Uninstall Mod";
+                ActionBtn.Content = "Disable Mod";
                 ActionBtn.Background = new SolidColorBrush(Color.Parse("#ff4444"));
             }
             else
             {
-                ActionBtn.Content = "Install Mod";
+                ActionBtn.Content = "Enable Mod";
                 ActionBtn.Background = new SolidColorBrush(Color.Parse("#00ffcc"));
             }
         }
@@ -289,71 +292,114 @@ namespace PsobbLauncher
 
         private async Task InstallModAsync(ModItem mod)
         {
-            StatusMessageText.Text = "Downloading...";
-            DownloadProgressBar.IsVisible = true;
-            DownloadProgressBar.Value = 0;
+            string stagingDir = Path.Combine(_gameRoot, "mod-staging", mod.Id);
+            bool requiresDownload = !Directory.Exists(stagingDir);
 
-            string tempZip = Path.Combine(Path.GetTempPath(), $"{mod.Id}.zip");
-
-            try
+            if (requiresDownload)
             {
-                // Download
-                using (var response = await _httpClient.GetAsync(mod.DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
-                {
-                    response.EnsureSuccessStatusCode();
-                    var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                    var canReportProgress = totalBytes != -1;
+                StatusMessageText.Text = "Downloading...";
+                DownloadProgressBar.IsVisible = true;
+                DownloadProgressBar.Value = 0;
 
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None))
+                string tempZip = Path.Combine(Path.GetTempPath(), $"{mod.Id}.zip");
+
+                try
+                {
+                    // Download
+                    using (var response = await _httpClient.GetAsync(mod.DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
                     {
-                        var buffer = new byte[8192];
-                        long totalRead = 0;
-                        int bytesRead;
-                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                        response.EnsureSuccessStatusCode();
+                        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                        var canReportProgress = totalBytes != -1;
+
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        using (var fileStream = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
-                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            totalRead += bytesRead;
-                            
-                            if (canReportProgress)
+                            var buffer = new byte[8192];
+                            long totalRead = 0;
+                            int bytesRead;
+                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
                             {
-                                var percent = (double)totalRead / totalBytes * 100;
-                                Dispatcher.UIThread.Post(() => 
+                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                totalRead += bytesRead;
+                                
+                                if (canReportProgress)
                                 {
-                                    DownloadProgressBar.Value = percent;
-                                    DownloadProgressText.Text = $"{Math.Round(percent)}%";
-                                });
+                                    var percent = (double)totalRead / totalBytes * 100;
+                                    Dispatcher.UIThread.Post(() => 
+                                    {
+                                        DownloadProgressBar.Value = percent;
+                                        DownloadProgressText.Text = $"{Math.Round(percent)}%";
+                                    });
+                                }
                             }
                         }
                     }
+
+                    StatusMessageText.Text = "Extracting...";
+                    DownloadProgressBar.IsVisible = false;
+
+                    await Task.Run(() =>
+                    {
+                        Directory.CreateDirectory(stagingDir);
+                        ZipFile.ExtractToDirectory(tempZip, stagingDir, true);
+                    });
                 }
+                catch (Exception ex)
+                {
+                    StatusMessageText.Text = "Download failed: " + ex.Message;
+                    if (File.Exists(tempZip)) File.Delete(tempZip);
+                    DownloadProgressBar.IsVisible = false;
+                    return;
+                }
+                finally
+                {
+                    if (File.Exists(tempZip)) File.Delete(tempZip);
+                    DownloadProgressBar.IsVisible = false;
+                }
+            }
 
-                StatusMessageText.Text = "Extracting...";
-                DownloadProgressBar.IsVisible = false;
-
-                // Extract and track files
+            try
+            {
+                StatusMessageText.Text = "Enabling...";
+                
+                // Track files
                 var state = new InstalledModState { Id = mod.Id, Version = mod.Version };
                 
                 await Task.Run(() =>
                 {
-                    using (var archive = ZipFile.OpenRead(tempZip))
+                    string backupDir = Path.Combine(_gameRoot, "mods-filebackups", mod.Id);
+
+                    // Process files
+                    string[] stagedFiles = Directory.GetFiles(stagingDir, "*.*", SearchOption.AllDirectories);
+                    
+                    foreach (string stagedFile in stagedFiles)
                     {
-                        foreach (var entry in archive.Entries)
+                        // Get relative path
+                        string relPath = Path.GetRelativePath(stagingDir, stagedFile);
+                        string targetPath = Path.GetFullPath(Path.Combine(_gameRoot, relPath));
+                        
+                        // Prevent Zip Slip
+                        if (!targetPath.StartsWith(_gameRoot, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        // Backup original if it exists
+                        if (File.Exists(targetPath))
                         {
-                            // Skip directory entries
-                            if (string.IsNullOrEmpty(entry.Name)) continue;
-
-                            string targetPath = Path.GetFullPath(Path.Combine(_gameRoot, entry.FullName));
-                            
-                            // Prevent Zip Slip
-                            if (!targetPath.StartsWith(_gameRoot, StringComparison.OrdinalIgnoreCase))
-                                continue;
-
-                            Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
-                            entry.ExtractToFile(targetPath, true);
-                            
-                            state.Files.Add(entry.FullName);
+                            string backupFilePath = Path.Combine(backupDir, relPath);
+                            if (!File.Exists(backupFilePath))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(backupFilePath)!);
+                                // Move the original file to backup dir
+                                File.Move(targetPath, backupFilePath, true);
+                                state.BackedUpFiles.Add(relPath);
+                            }
                         }
+
+                        // Install the modded file
+                        Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+                        File.Copy(stagedFile, targetPath, true);
+                        state.Files.Add(relPath);
                     }
                 });
 
@@ -361,22 +407,17 @@ namespace PsobbLauncher
                 SaveState();
                 
                 mod.IsInstalled = true;
-                StatusMessageText.Text = "Installed successfully!";
+                StatusMessageText.Text = "Enabled successfully!";
             }
             catch (Exception ex)
             {
-                StatusMessageText.Text = "Installation failed: " + ex.Message;
-            }
-            finally
-            {
-                if (File.Exists(tempZip)) File.Delete(tempZip);
-                DownloadProgressBar.IsVisible = false;
+                StatusMessageText.Text = "Enable failed: " + ex.Message;
             }
         }
 
         private async Task UninstallModAsync(ModItem mod)
         {
-            StatusMessageText.Text = "Uninstalling...";
+            StatusMessageText.Text = "Disabling...";
             
             try
             {
@@ -384,6 +425,9 @@ namespace PsobbLauncher
                 {
                     await Task.Run(() =>
                     {
+                        string backupDir = Path.Combine(_gameRoot, "mods-filebackups", mod.Id);
+
+                        // 1. Delete installed files
                         foreach (var relPath in state.Files)
                         {
                             string absPath = Path.Combine(_gameRoot, relPath);
@@ -392,6 +436,28 @@ namespace PsobbLauncher
                                 File.Delete(absPath);
                             }
                         }
+
+                        // 2. Restore backed up files
+                        if (state.BackedUpFiles != null)
+                        {
+                            foreach (var relPath in state.BackedUpFiles)
+                            {
+                                string backupFilePath = Path.Combine(backupDir, relPath);
+                                string targetPath = Path.Combine(_gameRoot, relPath);
+
+                                if (File.Exists(backupFilePath))
+                                {
+                                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+                                    File.Move(backupFilePath, targetPath, true);
+                                }
+                            }
+                        }
+
+                        // 3. Clean up backup directory
+                        if (Directory.Exists(backupDir))
+                        {
+                            try { Directory.Delete(backupDir, true); } catch { /* Ignore */ }
+                        }
                     });
                     
                     _installedState.Remove(mod.Id);
@@ -399,11 +465,11 @@ namespace PsobbLauncher
                 }
                 
                 mod.IsInstalled = false;
-                StatusMessageText.Text = "Uninstalled successfully!";
+                StatusMessageText.Text = "Disabled successfully!";
             }
             catch (Exception ex)
             {
-                StatusMessageText.Text = "Uninstallation failed: " + ex.Message;
+                StatusMessageText.Text = "Disable failed: " + ex.Message;
             }
         }
 

@@ -1,8 +1,9 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:PsobbLauncher"
         x:Class="PsobbLauncher.ModsWindow"
         Title="Mod Manager" Height="600" Width="800"
-        WindowStartupLocation="CenterOwner" Background="#1E1E1E"
+        WindowStartupLocation="CenterOwner" Background="#0a0a10"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
@@ -14,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Background="#222" Grid.Row="0" PointerPressed="TitleBar_PointerPressed" Padding="20,10">
+        <Border Background="#001428" BorderBrush="#00ffff" BorderThickness="0,0,0,1" Grid.Row="0" PointerPressed="TitleBar_PointerPressed" Padding="20,10">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
                     <TextBlock Text="MOD MANAGER" FontSize="20" FontWeight="Bold" Foreground="#00ffcc" VerticalAlignment="Center"/>
@@ -39,11 +40,11 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <TextBox x:Name="SearchBox" Grid.Row="0" Watermark="Search mods..." Margin="0,0,0,10" Background="#2A2A2A" Foreground="White" BorderBrush="#444" KeyUp="SearchBox_KeyUp"/>
+                <TextBox x:Name="SearchBox" Grid.Row="0" Watermark="Search mods..." Margin="0,0,0,10" Background="#0a0a10" Foreground="#e0f0ff" BorderBrush="#00ffff" KeyUp="SearchBox_KeyUp"/>
                 
-                <ListBox x:Name="ModsListBox" Grid.Row="1" Background="#2A2A2A" Foreground="White" BorderThickness="1" BorderBrush="#444" CornerRadius="5" SelectionChanged="ModsListBox_SelectionChanged">
+                <ListBox x:Name="ModsListBox" Grid.Row="1" Background="#001428" Foreground="#e0f0ff" BorderThickness="1" BorderBrush="#00ffff" CornerRadius="5" SelectionChanged="ModsListBox_SelectionChanged">
                     <ListBox.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="local:ModItem">
                             <Grid Margin="5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -52,7 +53,7 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <!-- Small Thumbnail in List -->
-                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="4" ClipToBounds="True" Margin="0,0,10,0" Background="#111">
+                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="4" ClipToBounds="True" Margin="0,0,10,0" Background="#0a0a10">
                                     <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
                                 </Border>
                                 
@@ -70,7 +71,7 @@
             </Grid>
 
             <!-- Mod Details -->
-            <Border Grid.Column="2" Background="#2A2A2A" BorderBrush="#444" BorderThickness="1" CornerRadius="5" Padding="15">
+            <Border Grid.Column="2" Background="#001428" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Padding="15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -83,20 +84,20 @@
                             
                             <StackPanel x:Name="ModInfoPanel" IsVisible="False" Spacing="10">
                                 <!-- Large Thumbnail in Details -->
-                                <Border Height="180" CornerRadius="5" ClipToBounds="True" Background="#111" Margin="0,0,0,10">
+                                <Border Height="180" CornerRadius="5" ClipToBounds="True" Background="#0a0a10" Margin="0,0,0,10">
                                     <Image x:Name="ModDetailsImage" Stretch="UniformToFill"/>
                                 </Border>
                                 
-                                <TextBlock x:Name="ModTitleText" FontSize="22" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="ModTitleText" FontSize="22" FontWeight="Bold" Foreground="#00ffff" TextWrapping="Wrap"/>
                                 <TextBlock x:Name="ModAuthorText" Foreground="#00ffcc" FontSize="14"/>
                                 <TextBlock x:Name="ModVersionText" Foreground="#aaa" FontSize="12"/>
                                 <TextBlock x:Name="ModSizeText" Foreground="#aaa" FontSize="12"/>
                                 <TextBlock x:Name="ModRatingText" Foreground="#ffca28" FontSize="12"/>
                                 
-                                <Border Height="1" Background="#444" Margin="0,5"/>
+                                <Border Height="1" Background="#00ffff" Opacity="0.3" Margin="0,5"/>
                                 
-                                <TextBlock Text="Description:" FontWeight="Bold" Foreground="#ccc"/>
-                                <TextBlock x:Name="ModDescText" Foreground="White" TextWrapping="Wrap"/>
+                                <TextBlock Text="Description:" FontWeight="Bold" Foreground="#e0f0ff"/>
+                                <TextBlock x:Name="ModDescText" Foreground="#e0f0ff" TextWrapping="Wrap"/>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -109,7 +110,7 @@
                         
                         <TextBlock x:Name="StatusMessageText" Foreground="#aaa" FontSize="12" HorizontalAlignment="Center"/>
                         
-                        <Button x:Name="ActionBtn" Content="Install Mod" Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="False" Click="ActionBtn_Click" Height="40" FontSize="16" FontWeight="Bold" CornerRadius="5"/>
+                        <Button x:Name="ActionBtn" Content="Enable Mod" Background="#001428" Foreground="#00ffff" BorderBrush="#00ffff" BorderThickness="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="False" Click="ActionBtn_Click" Height="40" FontSize="16" FontWeight="Bold" CornerRadius="5"/>
                     </StackPanel>
                 </Grid>
             </Border>

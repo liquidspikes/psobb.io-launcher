@@ -1,10 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Input;
-using Avalonia.Media;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace PsobbLauncher
             {
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync("https://psobb.io/api/events.php");
+                    var response = await client.GetAsync("https://psobb.io/api/get_events.php");
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -45,8 +46,8 @@ namespace PsobbLauncher
 
                                 var card = new Border
                                 {
-                                    Background = new SolidColorBrush(Color.Parse("#2A2A2A")),
-                                    BorderBrush = new SolidColorBrush(Color.Parse("#ffca28")),
+                                    Background = new SolidColorBrush(Color.Parse("#001428")),
+                                    BorderBrush = new SolidColorBrush(Color.Parse("#ffaa00")),
                                     BorderThickness = new Thickness(1, 1, 1, 1),
                                     CornerRadius = new CornerRadius(5),
                                     Padding = new Thickness(15),
@@ -54,9 +55,9 @@ namespace PsobbLauncher
                                     {
                                         Children =
                                         {
-                                            new TextBlock { Text = title, FontWeight = FontWeight.Bold, FontSize = 18, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 5) },
-                                            new TextBlock { Text = $"Type: {type} | {start} to {end}", Foreground = new SolidColorBrush(Color.Parse("#ffca28")), FontSize = 12, Margin = new Thickness(0, 0, 0, 10) },
-                                            new TextBlock { Text = desc, Foreground = new SolidColorBrush(Color.Parse("#CCC")), TextWrapping = TextWrapping.Wrap }
+                                            new TextBlock { Text = title, FontWeight = FontWeight.Bold, FontSize = 18, Foreground = new SolidColorBrush(Color.Parse("#e0f0ff")), Margin = new Thickness(0, 0, 0, 5) },
+                                            new TextBlock { Text = $"Type: {type} | {start} to {end}", Foreground = new SolidColorBrush(Color.Parse("#ffaa00")), FontSize = 12, Margin = new Thickness(0, 0, 0, 10) },
+                                            new TextBlock { Text = desc, Foreground = new SolidColorBrush(Color.Parse("#e0f0ff")), TextWrapping = TextWrapping.Wrap }
                                         }
                                     }
                                 };
@@ -76,6 +77,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Failed to load events: " + ex.Message);
                 if (EventsListPanel.Children.Contains(LoadingText))
                 {
                     LoadingText.Text = "Failed to load events. Could not connect to server.";

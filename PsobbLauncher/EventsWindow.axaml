@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="PsobbLauncher.EventsWindow"
         Title="Server Events" Height="500" Width="600"
-        WindowStartupLocation="CenterOwner" Background="#1E1E1E"
+        WindowStartupLocation="CenterOwner" Background="#0a0a10"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
@@ -14,9 +14,9 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Background="#222" Grid.Row="0" PointerPressed="TitleBar_PointerPressed" Padding="20,10">
+        <Border Background="#001428" BorderBrush="#ffaa00" BorderThickness="0,0,0,1" Grid.Row="0" PointerPressed="TitleBar_PointerPressed" Padding="20,10">
             <Grid>
-                <TextBlock Text="SERVER EVENTS" FontSize="20" FontWeight="Bold" Foreground="#ffca28" VerticalAlignment="Center"/>
+                <TextBlock Text="SERVER EVENTS" FontSize="20" FontWeight="Bold" Foreground="#ffaa00" VerticalAlignment="Center"/>
                 <Button Content="X" HorizontalAlignment="Right" Background="Transparent" Foreground="#888" BorderThickness="0" FontSize="16" Click="CloseButton_Click" VerticalAlignment="Center"/>
             </Grid>
         </Border>

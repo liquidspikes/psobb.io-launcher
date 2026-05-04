@@ -1,8 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="PsobbLauncher.SettingsWindow"
-        Title="Configuration" Height="520" Width="480" FontSize="14"
-        CanResize="False" WindowStartupLocation="CenterOwner" Background="#222"
+        Title="Configuration" Height="650" Width="550" FontSize="14"
+        CanResize="False" WindowStartupLocation="CenterOwner" Background="#0a0a10"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
@@ -11,13 +11,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/> <!-- Custom Title -->
             <RowDefinition Height="*"/>   <!-- Content -->
-            <RowDefinition Height="50"/>  <!-- Actions -->
+            <RowDefinition Height="60"/>  <!-- Actions -->
         </Grid.RowDefinitions>
 
         <!-- Title Bar -->
-        <Border Background="#333" Grid.Row="0" PointerPressed="TitleBar_PointerPressed">
+        <Border Background="#001428" BorderBrush="#00ffff" BorderThickness="0,0,0,1" Grid.Row="0" PointerPressed="TitleBar_PointerPressed">
             <Grid>
-                <TextBlock Text="Configuration" VerticalAlignment="Center" Margin="10,0" Foreground="#DDD"/>
+                <TextBlock Text="Configuration" VerticalAlignment="Center" Margin="15,0" Foreground="#00ffff" FontWeight="Bold"/>
                 <Button Content="X" HorizontalAlignment="Right" Width="30" Margin="0,0,5,0" Background="Transparent" Foreground="#DDD" BorderThickness="0" Click="CloseButton_Click"/>
             </Grid>
         </Border>
@@ -27,185 +27,228 @@
 
             <!-- Graphics Tab -->
             <TabItem Header="GRAPHICS">
-                <StackPanel Margin="10,20">
-                    <Grid Margin="0,0,0,15">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="140"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="Resolution:" Foreground="#CCC"/>
-                        <ComboBox x:Name="ComboResolution" Grid.Column="1" Height="28">
-                            <ComboBoxItem Content="640 x 480"/>
-                            <ComboBoxItem Content="800 x 600"/>
-                            <ComboBoxItem Content="1024 x 768"/>
-                            <ComboBoxItem Content="1280 x 720"/>
-                            <ComboBoxItem Content="1280 x 800"/>
-                            <ComboBoxItem Content="1366 x 768"/>
-                            <ComboBoxItem Content="1920 x 1080"/>
-                            <ComboBoxItem Content="1920 x 1200"/>
-                            <ComboBoxItem Content="2560 x 1440"/>
-                            <ComboBoxItem Content="2560 x 1600"/>
-                            <ComboBoxItem Content="2560 x 1664"/>
-                            <ComboBoxItem Content="2880 x 1864"/>
-                            <ComboBoxItem Content="3024 x 1964"/>
-                            <ComboBoxItem Content="3440 x 1440"/>
-                            <ComboBoxItem Content="3456 x 2234"/>
-                            <ComboBoxItem Content="3840 x 2160"/>
-                        </ComboBox>
-                    </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10" Spacing="15">
+                        
+                        <!-- Display Section -->
+                        <Border Background="#001428" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="DISPLAY" Foreground="#00ffff" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Resolution:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboResolution" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="640 x 480"/>
+                                        <ComboBoxItem Content="800 x 600"/>
+                                        <ComboBoxItem Content="1024 x 768"/>
+                                        <ComboBoxItem Content="1280 x 720"/>
+                                        <ComboBoxItem Content="1280 x 800"/>
+                                        <ComboBoxItem Content="1366 x 768"/>
+                                        <ComboBoxItem Content="1920 x 1080"/>
+                                        <ComboBoxItem Content="1920 x 1200"/>
+                                        <ComboBoxItem Content="2560 x 1440"/>
+                                        <ComboBoxItem Content="2560 x 1600"/>
+                                        <ComboBoxItem Content="2560 x 1664"/>
+                                        <ComboBoxItem Content="2880 x 1864"/>
+                                        <ComboBoxItem Content="3024 x 1964"/>
+                                        <ComboBoxItem Content="3440 x 1440"/>
+                                        <ComboBoxItem Content="3456 x 2234"/>
+                                        <ComboBoxItem Content="3840 x 2160"/>
+                                    </ComboBox>
+                                </Grid>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Mode:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboMode" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                         <ComboBoxItem Content="Fullscreen"/>
+                                         <ComboBoxItem Content="Windowed"/>
+                                         <ComboBoxItem Content="Virtual Fullscreen"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                    <Grid Margin="0,0,0,15">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="140"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="Mode:" Foreground="#CCC"/>
-                        <ComboBox x:Name="ComboMode" Grid.Column="1" Height="28">
-                             <ComboBoxItem Content="Fullscreen"/>
-                             <ComboBoxItem Content="Windowed"/>
-                             <ComboBoxItem Content="Virtual Fullscreen"/>
-                        </ComboBox>
-                    </Grid>
+                        <!-- Features Section -->
+                        <Border Background="#001428" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="FEATURES" Foreground="#00ffff" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                
+                                <CheckBox x:Name="CheckFrameGen" Content="Enable Frame Generation" Foreground="#e0f0ff" ToolTip.Tip="Generates extra frames for smoother motion (30 FPS → up to 240 Hz)" IsCheckedChanged="CheckFrameGen_Checked"/>
+                                
+                                <Grid x:Name="GridTargetHz" IsVisible="False">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Target Hz:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboTargetHz" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="30 Hz (Native)" Tag="30"/>
+                                        <ComboBoxItem Content="60 Hz" Tag="60"/>
+                                        <ComboBoxItem Content="75 Hz" Tag="75"/>
+                                        <ComboBoxItem Content="90 Hz" Tag="90"/>
+                                        <ComboBoxItem Content="120 Hz" Tag="120"/>
+                                        <ComboBoxItem Content="144 Hz" Tag="144"/>
+                                        <ComboBoxItem Content="165 Hz" Tag="165"/>
+                                        <ComboBoxItem Content="240 Hz" Tag="240"/>
+                                        <ComboBoxItem Content="360 Hz" Tag="360"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                    <CheckBox x:Name="CheckSaveLogin" Content="Save Login Information" Margin="140,0,0,15" Foreground="#CCC" IsChecked="True"/>
-                    <CheckBox x:Name="CheckFrameGen" Content="Enable Frame Generation" Margin="140,0,0,10" Foreground="#CCC" ToolTip.Tip="Generates extra frames for smoother motion (30 FPS → up to 240 Hz)" IsCheckedChanged="CheckFrameGen_Checked"/>
-                    
-                    <Grid x:Name="GridTargetHz" Margin="0,0,0,15" IsVisible="False">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="140"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="Target Hz:" Foreground="#CCC"/>
-                        <ComboBox x:Name="ComboTargetHz" Grid.Column="1" Height="28">
-                            <ComboBoxItem Content="30 Hz (Native)" Tag="30"/>
-                            <ComboBoxItem Content="60 Hz" Tag="60"/>
-                            <ComboBoxItem Content="75 Hz" Tag="75"/>
-                            <ComboBoxItem Content="90 Hz" Tag="90"/>
-                            <ComboBoxItem Content="120 Hz" Tag="120"/>
-                            <ComboBoxItem Content="144 Hz" Tag="144"/>
-                            <ComboBoxItem Content="165 Hz" Tag="165"/>
-                            <ComboBoxItem Content="240 Hz" Tag="240"/>
-                            <ComboBoxItem Content="360 Hz" Tag="360"/>
-                        </ComboBox>
-                    </Grid>
-                    <CheckBox x:Name="CheckDebugLogs" Content="Enable Debug Logs" Margin="140,0,0,15" Foreground="#CCC" ToolTip.Tip="Write debug information to log files"/>
-                </StackPanel>
+                        <!-- System Section -->
+                        <Border Background="#001428" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="SYSTEM" Foreground="#00ffff" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                <CheckBox x:Name="CheckSaveLogin" Content="Save Login Information" Foreground="#e0f0ff" IsChecked="True"/>
+                                <CheckBox x:Name="CheckDebugLogs" Content="Enable Debug Logs" Foreground="#e0f0ff" ToolTip.Tip="Write debug information to log files"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <!-- Audio Tab -->
             <TabItem Header="AUDIO">
-                <StackPanel Margin="10,20">
-                    <CheckBox x:Name="CheckSoundGlobal" Content="Enable Global Sound" Margin="0,0,0,15" Foreground="#CCC"/>
-                    <CheckBox x:Name="CheckBGM" Content="Enable Background Music (BGM)" Margin="0,0,0,15" Foreground="#CCC"/>
-                    <CheckBox x:Name="CheckSE" Content="Enable Sound Effects (SE)" Margin="0,0,0,15" Foreground="#CCC"/>
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10" Spacing="15">
+                        <Border Background="#001428" BorderBrush="#ffaa00" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="SOUND OPTIONS" Foreground="#ffaa00" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                <CheckBox x:Name="CheckSoundGlobal" Content="Enable Global Sound" Foreground="#e0f0ff"/>
+                                <CheckBox x:Name="CheckBGM" Content="Enable Background Music (BGM)" Foreground="#e0f0ff"/>
+                                <CheckBox x:Name="CheckSE" Content="Enable Sound Effects (SE)" Foreground="#e0f0ff"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <!-- Advanced Tab -->
             <TabItem Header="ADVANCED">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10,20">
-                        <CheckBox x:Name="CheckVsync" Content="Enable V-Sync" Margin="0,0,0,10" Foreground="#CCC"/>
-                        <CheckBox x:Name="CheckAdvEffect" Content="Advanced Effects" Margin="0,0,0,10" Foreground="#CCC"/>
-                        <CheckBox x:Name="CheckHighResTex" Content="High Resolution Textures" Margin="0,0,0,15" Foreground="#CCC" IsChecked="True"/>
+                    <StackPanel Margin="10" Spacing="15">
+                        
+                        <!-- Rendering Section -->
+                        <Border Background="#001428" BorderBrush="#9d4edd" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="RENDERING" Foreground="#9d4edd" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                
+                                <CheckBox x:Name="CheckVsync" Content="Enable V-Sync" Foreground="#e0f0ff"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Shadows:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboShadow" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Off"/>
+                                        <ComboBoxItem Content="Low"/>
+                                        <ComboBoxItem Content="High"/>
+                                    </ComboBox>
+                                </Grid>
 
-                        <!-- Shadows -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Shadows:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboShadow" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Off"/>
-                                <ComboBoxItem Content="Low"/>
-                                <ComboBoxItem Content="High"/>
-                            </ComboBox>
-                        </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Map Detail:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboMap" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Low"/>
+                                        <ComboBoxItem Content="Normal"/>
+                                        <ComboBoxItem Content="High"/>
+                                    </ComboBox>
+                                </Grid>
 
-                        <!-- Map Detail -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Map Detail:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboMap" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Low"/>
-                                <ComboBoxItem Content="Normal"/>
-                                <ComboBoxItem Content="High"/>
-                            </ComboBox>
-                        </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Fog Emulation:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboFog" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Off"/>
+                                        <ComboBoxItem Content="Standard"/>
+                                        <ComboBoxItem Content="High"/>
+                                    </ComboBox>
+                                </Grid>
 
-                         <!-- Fog -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Fog Emulation:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboFog" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Off"/>
-                                <ComboBoxItem Content="Standard"/>
-                                <ComboBoxItem Content="High"/>
-                            </ComboBox>
-                        </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Clip Distance:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboClip" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Short"/>
+                                        <ComboBoxItem Content="Normal"/>
+                                        <ComboBoxItem Content="Far"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <!-- Clip Distance -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Clip Distance:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboClip" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Short"/>
-                                <ComboBoxItem Content="Normal"/>
-                                <ComboBoxItem Content="Far"/>
-                            </ComboBox>
-                        </Grid>
+                        <!-- Enhancements Section -->
+                        <Border Background="#001428" BorderBrush="#9d4edd" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <StackPanel Spacing="15">
+                                <TextBlock Text="ENHANCEMENTS" Foreground="#9d4edd" FontWeight="Bold" FontSize="12" Margin="0,0,0,5" />
+                                
+                                <CheckBox x:Name="CheckAdvEffect" Content="Advanced Effects" Foreground="#e0f0ff"/>
+                                <CheckBox x:Name="CheckHighResTex" Content="High Resolution Textures" Foreground="#e0f0ff" IsChecked="True"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="HUD Scale:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboHUDScale" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Auto" Tag="Auto"/>
+                                        <ComboBoxItem Content="0.5x" Tag="0.5"/>
+                                        <ComboBoxItem Content="0.75x" Tag="0.75"/>
+                                        <ComboBoxItem Content="1.0x (Default)" Tag="1.0"/>
+                                        <ComboBoxItem Content="1.25x" Tag="1.25"/>
+                                        <ComboBoxItem Content="1.5x" Tag="1.5"/>
+                                    </ComboBox>
+                                </Grid>
 
-                        <!-- HUD Scale -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="HUD Scale:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboHUDScale" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Auto" Tag="Auto"/>
-                                <ComboBoxItem Content="0.5x" Tag="0.5"/>
-                                <ComboBoxItem Content="0.75x" Tag="0.75"/>
-                                <ComboBoxItem Content="1.0x (Default)" Tag="1.0"/>
-                                <ComboBoxItem Content="1.25x" Tag="1.25"/>
-                                <ComboBoxItem Content="1.5x" Tag="1.5"/>
-                            </ComboBox>
-                        </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Frame Skip:" Foreground="#e0f0ff" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="ComboFrameSkip" Grid.Column="1" Height="32" HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Off"/>
+                                        <ComboBoxItem Content="1 Frame"/>
+                                        <ComboBoxItem Content="2 Frames"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
-                        <!-- Frame Skip -->
-                        <Grid Margin="0,0,0,10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Frame Skip:" Foreground="#CCC"/>
-                            <ComboBox x:Name="ComboFrameSkip" Grid.Column="1" Height="25">
-                                <ComboBoxItem Content="Off"/>
-                                <ComboBoxItem Content="1 Frame"/>
-                                <ComboBoxItem Content="2 Frames"/>
-                            </ComboBox>
-                        </Grid>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
         </TabControl>
 
         <!-- Footer Actions -->
-        <Grid Grid.Row="2" Background="#2A2A2A">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
-                <Button Classes="accent" Content="Save" Width="80" Height="25" Margin="0,0,10,0" Background="#007ACC" Foreground="White" BorderThickness="0" Click="SaveButton_Click" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                <Button Content="Cancel" Width="80" Height="25" Background="#444" Foreground="#DDD" BorderThickness="0" Click="CancelButton_Click" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <Border Grid.Row="2" Background="#001428" BorderBrush="#00ffff" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="15,0">
+                <Button Content="Save Settings" Width="130" Height="36" Margin="0,0,15,0" Background="#001428" Foreground="#00ffff" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Click="SaveButton_Click" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold"/>
+                <Button Content="Cancel" Width="100" Height="36" Background="#001428" Foreground="#ff4444" BorderBrush="#ff4444" BorderThickness="1" CornerRadius="5" Click="CancelButton_Click" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
             </StackPanel>
-        </Grid>
+        </Border>
     </Grid>
 </Window>

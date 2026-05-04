@@ -3,8 +3,8 @@ using Avalonia.Interactivity;
 using Avalonia.Input;
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace PsobbLauncher
 {
@@ -13,6 +13,46 @@ namespace PsobbLauncher
         public MainWindow()
         {
             InitializeComponent();
+            CheckForGameUpdate();
+        }
+
+        private void CheckForGameUpdate()
+        {
+            try
+            {
+                string root = AppDomain.CurrentDomain.BaseDirectory;
+                string patPath = Path.Combine(root, "psobb.pat");
+                string exePath = Path.Combine(root, "psobb.exe");
+                string bakPath = Path.Combine(root, "psobb.exe.bak");
+
+                // If pat/exe are not in root, check one folder up
+                if (!File.Exists(patPath) && !File.Exists(exePath))
+                {
+                    string parentDir = Path.GetFullPath(Path.Combine(root, ".."));
+                    patPath = Path.Combine(parentDir, "psobb.pat");
+                    exePath = Path.Combine(parentDir, "psobb.exe");
+                    bakPath = Path.Combine(parentDir, "psobb.exe.bak");
+                }
+
+                if (File.Exists(patPath))
+                {
+                    if (File.Exists(bakPath))
+                    {
+                        File.Delete(bakPath);
+                    }
+
+                    if (File.Exists(exePath))
+                    {
+                        File.Move(exePath, bakPath);
+                    }
+
+                    File.Move(patPath, exePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Failed to apply psobb.pat update: " + ex.Message);
+            }
         }
 
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
@@ -57,7 +97,7 @@ namespace PsobbLauncher
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to launch psobb.exe: " + ex.Message);
+                Debug.WriteLine("Failed to launch psobb.exe: " + ex.Message);
             }
         }
 
@@ -83,7 +123,11 @@ namespace PsobbLauncher
                 {
                     Process.Start("open", url);
                 }
-            } catch { }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Failed to open website: " + ex.Message);
+            }
         }
 
         private void ModsButton_Click(object sender, RoutedEventArgs e)
@@ -133,7 +177,7 @@ namespace PsobbLauncher
                     using (var sourceBitmap = new Avalonia.Media.Imaging.Bitmap(sourcePath))
                     {
                         // Create a 32x32 scaled version (High Quality)
-                        using (var scaledBitmap = sourceBitmap.CreateScaledBitmap(new Avalonia.PixelSize(32, 32), Avalonia.Visuals.Media.Imaging.BitmapInterpolationMode.HighQuality))
+                        using (var scaledBitmap = sourceBitmap.CreateScaledBitmap(new Avalonia.PixelSize(32, 32), Avalonia.Media.Imaging.BitmapInterpolationMode.HighQuality))
                         {
                             // We need to write a simple 32-bit BMP file
                             int width = 32;
@@ -157,13 +201,10 @@ namespace PsobbLauncher
                             BitConverter.GetBytes((short)bpp).CopyTo(bmpFile, 28); // BPP
                             BitConverter.GetBytes(dataSize).CopyTo(bmpFile, 34); // ImageSize
                             
-                            // Copy Pixel Data
-                            // Create a temporary WriteableBitmap to access pixels
-                            var format = Avalonia.Platform.PixelFormat.Bgra8888;
-                            var alphaFormat = Avalonia.Platform.AlphaFormat.Unpremul;
+                            // Copy Pixel Data via RenderTargetBitmap
                             using (var renderTarget = new Avalonia.Media.Imaging.RenderTargetBitmap(new Avalonia.PixelSize(width, height), new Avalonia.Vector(96, 96)))
                             {
-                                using (var ctx = renderTarget.CreateDrawingContext(null))
+                                using (var ctx = renderTarget.CreateDrawingContext())
                                 {
                                     ctx.DrawImage(scaledBitmap, new Avalonia.Rect(0, 0, width, height));
                                 }
@@ -189,7 +230,7 @@ namespace PsobbLauncher
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error processing team flag: " + ex.Message);
+                    Debug.WriteLine("Error processing team flag: " + ex.Message);
                 }
             }
         }

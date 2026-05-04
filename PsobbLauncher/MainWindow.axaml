@@ -3,7 +3,7 @@
         x:Class="PsobbLauncher.MainWindow"
         Title="PSOBB.IO" Height="450" Width="1000"
         Icon="/PSOBBIO_icon.ico"
-        WindowStartupLocation="CenterScreen" Background="#1E1E1E"
+        WindowStartupLocation="CenterScreen" Background="#0a0a10"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1">
@@ -11,7 +11,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>   <!-- Sidebar Image -->
-            <ColumnDefinition Width="250"/> <!-- Main Content -->
+            <ColumnDefinition Width="320"/> <!-- Main Content -->
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar Art -->
@@ -35,13 +35,13 @@
 
             <!-- Header -->
             <StackPanel Grid.Row="0" Margin="0,30,0,0">
-                <TextBlock Text="PSOBB.IO" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="PSOBB.IO" FontSize="28" FontWeight="Bold" Foreground="#00ffff" />
                 <TextBlock Text="PHANTASY STAR ONLINE BLUE BURST" FontSize="10" Foreground="#777" Margin="2,0,0,0"/>
             </StackPanel>
 
             <!-- Buttons -->
             <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
-                <Button Classes="accent" Content="LAUNCH GAME" Cursor="Hand" Height="60" FontSize="20" FontWeight="Bold" Click="LaunchButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <Button Content="LAUNCH GAME" Cursor="Hand" Height="60" FontSize="20" FontWeight="Bold" Background="#001428" Foreground="#00ffff" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Click="LaunchButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
 
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions>
@@ -50,8 +50,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     
-                    <Button Grid.Column="0" Content="CONFIGURATION" Height="40" Background="#333" Foreground="#CCC" BorderThickness="0" CornerRadius="5" Click="SettingsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Button Grid.Column="2" Content="WEBSITE" Height="40" Background="#333" Foreground="#CCC" BorderThickness="0" CornerRadius="5" Click="WebsiteButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="0" Content="CONFIGURATION" FontSize="11" Height="40" Background="#001428" Foreground="#e0f0ff" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Click="SettingsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="2" Content="WEBSITE" FontSize="11" Height="40" Background="#001428" Foreground="#e0f0ff" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Click="WebsiteButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                 </Grid>
 
                 <Grid Margin="0,10,0,0">
@@ -63,9 +63,9 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     
-                    <Button Grid.Column="0" Content="MODS" Height="40" Background="#2c3e50" Foreground="#00ffcc" BorderThickness="0" CornerRadius="5" Click="ModsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Button Grid.Column="2" Content="EVENTS" Height="40" Background="#2c3e50" Foreground="#ffca28" BorderThickness="0" CornerRadius="5" Click="EventsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Button Grid.Column="4" Content="TEAM FLAG" Height="40" Background="#2c3e50" Foreground="#ffaa00" BorderThickness="0" CornerRadius="5" Click="TeamFlagButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="0" Content="MODS" FontSize="11" Height="40" Background="#001428" Foreground="#e0f0ff" BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5" Click="ModsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="2" Content="EVENTS" FontSize="11" Height="40" Background="#001428" Foreground="#e0f0ff" BorderBrush="#ffaa00" BorderThickness="1" CornerRadius="5" Click="EventsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Button Grid.Column="4" Content="TEAM FLAG" FontSize="11" Height="40" Background="#001428" Foreground="#e0f0ff" BorderBrush="#9d4edd" BorderThickness="1" CornerRadius="5" Click="TeamFlagButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                 </Grid>
                 
                 <TextBlock Text="v1.0.1 | psobb.io" Foreground="#444" HorizontalAlignment="Center" Margin="0,15,0,0" FontSize="10"/>

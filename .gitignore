@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+
+# IDE / editor
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Build logs
+build_log.txt
+
+# NuGet (restored on build)
+*.nupkg
