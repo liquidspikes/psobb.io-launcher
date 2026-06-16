@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PsobbLauncher.AddServerDialog"
+        Title="Add Server" Width="360" Height="280"
+        WindowStartupLocation="CenterOwner" Background="#0a0a10"
+        CanResize="False">
+    <StackPanel Margin="20" Spacing="8">
+        <TextBlock Text="ADD SERVER" FontSize="16" FontWeight="Bold" Foreground="#00ffff" Margin="0,0,0,8"/>
+
+        <TextBlock Text="Name" FontSize="10" Foreground="#777"/>
+        <TextBox x:Name="NameBox" Watermark="My Server"/>
+
+        <TextBlock Text="Server Address (host)" FontSize="10" Foreground="#777"/>
+        <TextBox x:Name="HostBox" Watermark="192.168.0.56"/>
+
+        <Grid Margin="0,4,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Login Port" FontSize="10" Foreground="#777"/>
+                <TextBox x:Name="LoginPortBox" Text="12000"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Patch Port" FontSize="10" Foreground="#777"/>
+                <TextBox x:Name="PatchPortBox" Text="11000"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Cancel" HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" Click="Cancel_Click"
+                    Background="#001428" Foreground="#e0f0ff" BorderBrush="#555" BorderThickness="1"/>
+            <Button Grid.Column="2" Content="Save" HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" Click="Save_Click"
+                    Background="#001428" Foreground="#00ffff" BorderBrush="#00ffff" BorderThickness="1"/>
+        </Grid>
+    </StackPanel>
+</Window>

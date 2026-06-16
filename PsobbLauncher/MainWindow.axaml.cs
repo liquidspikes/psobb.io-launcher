@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace PsobbLauncher
 {
@@ -14,8 +15,8 @@ namespace PsobbLauncher
         {
             InitializeComponent();
             CheckForGameUpdate();
+            InitServers();
         }
-
         private void CheckForGameUpdate()
         {
             try
@@ -54,6 +55,66 @@ namespace PsobbLauncher
                 Debug.WriteLine("Failed to apply psobb.pat update: " + ex.Message);
             }
         }
+        private readonly ServerStore _store = new();
+        private CaptureService? _capture;
+        private ServerProfile? _selectedServer;
+
+        private void InitServers()
+        {
+            _store.Load();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                _capture = new CaptureService(_store);
+
+            RefreshServerCombo();
+        }
+
+        private void RefreshServerCombo()
+        {
+            ServerCombo.ItemsSource = _store.Servers.Select(s => s.Name).ToList();
+
+            if (_store.Servers.Count > 0)
+                ServerCombo.SelectedIndex = 0;
+        }
+
+        private void ServerCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            int idx = ServerCombo.SelectedIndex;
+            _selectedServer = (idx >= 0 && idx < _store.Servers.Count)
+                ? _store.Servers[idx]
+                : null;
+        }
+
+        private async void AddServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            var dlg = new AddServerDialog();
+            var profile = await dlg.ShowDialog<ServerProfile?>(this);
+            if (profile is null)
+                return;
+
+            _store.AddOrUpdate(profile);
+            RefreshServerCombo();
+            ServerCombo.SelectedIndex = _store.Servers.FindIndex(s => s.Id == profile.Id);
+            StatusText.Text = $"Added server: {profile.Name}";
+        }
+
+        private void CaptureButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                StatusText.Text = "Credential capture is Windows-only.";
+                return;
+            }
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server first.";
+                return;
+            }
+
+            bool ok = _capture!.CaptureCurrentLogin(_selectedServer);
+            StatusText.Text = ok
+                ? $"Captured login for {_selectedServer.Name}."
+                : "No login found. Launch this server and log in once first.";
+        }
 
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
         {
@@ -66,15 +127,23 @@ namespace PsobbLauncher
                     string parentExe = Path.GetFullPath(Path.Combine(root, "..", "psobb.exe"));
                     if (File.Exists(parentExe)) {
                         exePath = parentExe;
-                        root = Path.GetDirectoryName(exePath);
+                        root = Path.GetDirectoryName(exePath) ?? root;
                     }
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     // Force WINDOW_MODE=1 in registry so the game launches in windowed mode
-                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\SonicTeam\PSOBB")) {
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\SonicTeam\PSOBB"))
+                    {
                         if (key != null) key.SetValue("WINDOW_MODE", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                    }
+
+                    // Write the selected server's psobb.cfg and stamp its saved credentials
+                    if (_selectedServer != null)
+                    {
+                        PsobbConfig.WriteForProfile(root, _selectedServer);
+                        _capture?.ApplyCredentials(_selectedServer);
                     }
 
                     ProcessStartInfo psi = new ProcessStartInfo(exePath);
