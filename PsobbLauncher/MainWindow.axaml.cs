@@ -147,22 +147,39 @@ namespace PsobbLauncher
                 ? $"Captured login for {_selectedServer.Name}."
                 : "No login found. Launch this server and log in once first.";
         }
+        /// <summary>
+        /// Locates psobb.exe: launcher's own dir first, then the parent dir.
+        /// Returns the exe path and sets gameDir to its directory, or returns
+        /// null if not found.
+        /// </summary>
+        private static string? ResolveGameExe(out string gameDir)
+        {
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            gameDir = root;
 
+            string exePath = Path.Combine(root, "psobb.exe");
+            if (File.Exists(exePath))
+                return exePath;
+
+            string parentExe = Path.GetFullPath(Path.Combine(root, "..", "psobb.exe"));
+            if (File.Exists(parentExe))
+            {
+                gameDir = Path.GetDirectoryName(parentExe) ?? root;
+                return parentExe;
+            }
+
+            return null;
+        }
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string root = AppDomain.CurrentDomain.BaseDirectory;
-                string exePath = Path.Combine(root, "psobb.exe");
-                
-                if (!File.Exists(exePath)) {
-                    string parentExe = Path.GetFullPath(Path.Combine(root, "..", "psobb.exe"));
-                    if (File.Exists(parentExe)) {
-                        exePath = parentExe;
-                        root = Path.GetDirectoryName(exePath) ?? root;
-                    }
+                string? exePath = ResolveGameExe(out string root);
+                if (exePath is null)
+                {
+                    Debug.WriteLine("psobb.exe not found.");
+                    return;
                 }
-
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     // Force WINDOW_MODE=1 in registry so the game launches in windowed mode
