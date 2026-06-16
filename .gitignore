@@ -18,3 +18,5 @@ build_log.txt
 
 # NuGet (restored on build)
 *.nupkg
+/UpgradeLog.htm
+/Backup/PsobbLauncher.slnx
