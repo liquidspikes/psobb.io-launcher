@@ -20,3 +20,4 @@ build_log.txt
 *.nupkg
 /UpgradeLog.htm
 /Backup/PsobbLauncher.slnx
+/publish/single

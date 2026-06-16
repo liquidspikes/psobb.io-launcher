@@ -96,7 +96,39 @@ namespace PsobbLauncher
             ServerCombo.SelectedIndex = _store.Servers.FindIndex(s => s.Id == profile.Id);
             StatusText.Text = $"Added server: {profile.Name}";
         }
+        private async void EditServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server to edit.";
+                return;
+            }
 
+            var dlg = new AddServerDialog(_selectedServer);
+            var result = await dlg.ShowDialog<ServerProfile?>(this);
+            if (result is null)
+                return;
+
+            _store.AddOrUpdate(result); // same Id, so updates in place
+            RefreshServerCombo();
+            ServerCombo.SelectedIndex = _store.Servers.FindIndex(s => s.Id == result.Id);
+            StatusText.Text = $"Updated server: {result.Name}";
+        }
+
+        private void DeleteServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server to delete.";
+                return;
+            }
+
+            string name = _selectedServer.Name;
+            _store.Remove(_selectedServer.Id);
+            _selectedServer = null;
+            RefreshServerCombo();
+            StatusText.Text = $"Deleted server: {name}";
+        }
         private void CaptureButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
