@@ -76,5 +76,39 @@ namespace PsobbLauncher
             Servers.RemoveAll(s => s.Id == id);
             Save();
         }
+        private static readonly string SeededMarkerPath = Path.Combine(Dir, ".seeded");
+
+        /// <summary>
+        /// Seeds the default psobb.io profile exactly once (first run). A marker
+        /// file records that seeding happened, so a user who later deletes the
+        /// default profile doesn't get it re-added on the next launch.
+        /// </summary>
+        public void SeedDefaultsIfFirstRun()
+        {
+            if (File.Exists(SeededMarkerPath))
+                return;
+
+            // Only seed if the store is also empty, so we never inject into an
+            // existing user's profile list (e.g. someone upgrading from a build
+            // that predates seeding).
+            if (Servers.Count == 0)
+            {
+                Servers.Add(new ServerProfile
+                {
+                    Name = "psobb.io",
+                    LoginHost = "psobb.io",
+                    LoginPort = 12000,
+                    PatchHost = "psobb.io",
+                    PatchPort = 11000,
+                    AuthMode = AuthMode.Standard
+                    // No credentials — user captures their own login.
+                });
+                Save();
+            }
+
+            // Mark seeded regardless, so this only ever runs once.
+            Directory.CreateDirectory(Dir);
+            File.WriteAllText(SeededMarkerPath, DateTime.UtcNow.ToString("o"));
+        }
     }
 }

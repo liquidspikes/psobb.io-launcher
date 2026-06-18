@@ -62,6 +62,8 @@ namespace PsobbLauncher
         private void InitServers()
         {
             _store.Load();
+            _store.SeedDefaultsIfFirstRun();
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 _capture = new CaptureService(_store);
 
@@ -398,5 +400,6 @@ namespace PsobbLauncher
                 desktop.Shutdown();
             }
         }
+       
     }
 }
