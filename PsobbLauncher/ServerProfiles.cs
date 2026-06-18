@@ -2,6 +2,8 @@ using System;
 
 namespace PsobbLauncher
 {
+    public enum AuthMode { Standard, Hangame }
+
     /// <summary>
     /// One server the launcher can connect to. Holds the psobb.cfg
     /// connection values and the captured (DPAPI-protected) credentials.
@@ -28,5 +30,18 @@ namespace PsobbLauncher
 
         public bool HasCredentials =>
             CredentialsValid && ProtectedPassword is { Length: > 0 };
+
+        // Which auth path this profile uses at launch.
+        public AuthMode AuthMode { get; set; } = AuthMode.Standard;
+
+        // --- Hangame path (memory-hook auth via native loader) ---
+        // Username must end in @HG, <= 11 chars. Plain text like Account.
+        public string HangameUsername { get; set; } = "";
+        // Numeric 1-8 digits. DPAPI-protected at rest, same as the captured blob.
+        public byte[]? HangameProtectedPassword { get; set; }
+
+        public bool HasHangameCredentials =>
+            !string.IsNullOrEmpty(HangameUsername)
+            && HangameProtectedPassword is { Length: > 0 };
     }
 }

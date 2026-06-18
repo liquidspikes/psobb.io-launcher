@@ -180,19 +180,31 @@ namespace PsobbLauncher
                     Debug.WriteLine("psobb.exe not found.");
                     return;
                 }
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Force WINDOW_MODE=1 in registry so the game launches in windowed mode
+                    // Force WINDOW_MODE=1 in registry so the game launches windowed
                     using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\SonicTeam\PSOBB"))
                     {
                         if (key != null) key.SetValue("WINDOW_MODE", 1, Microsoft.Win32.RegistryValueKind.DWord);
                     }
 
-                    // Write the selected server's psobb.cfg and stamp its saved credentials
+                    // Write the selected server's psobb.cfg for either path.
                     if (_selectedServer != null)
                     {
                         PsobbConfig.WriteForProfile(root, _selectedServer);
-                        _capture?.ApplyCredentials(_selectedServer);
+
+                        if (_selectedServer.AuthMode == AuthMode.Hangame)
+                        {
+                            // Hangame path: bypass the registry entirely. Drop creds for
+                            // the ASI to consume; the ASI deletes the file on load.
+                            WriteHangameHandoff(root, _selectedServer);
+                        }
+                        else
+                        {
+                            // Standard path: registry capture-replay, unchanged.
+                            _capture?.ApplyCredentials(_selectedServer);
+                        }
                     }
 
                     ProcessStartInfo psi = new ProcessStartInfo(exePath);
@@ -207,7 +219,7 @@ namespace PsobbLauncher
                     psi.WorkingDirectory = root;
                     Process.Start(psi);
                 }
-                
+
                 if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     desktop.Shutdown();
@@ -224,7 +236,27 @@ namespace PsobbLauncher
             SettingsWindow settings = new SettingsWindow();
             settings.ShowDialog(this);
         }
+        private static void WriteHangameHandoff(string gameDir, ServerProfile p)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return;
+            if (p.HangameProtectedPassword is not { Length: > 0 })
+                return;
 
+            // Decrypt only at the moment of launch; keep the plaintext window tight.
+            byte[] plain = CredentialProtector.Unprotect(p.HangameProtectedPassword);
+            string password = System.Text.Encoding.UTF8.GetString(plain);
+            Array.Clear(plain, 0, plain.Length);
+
+            string path = Path.Combine(gameDir, "hangame.ini");
+            string contents =
+                "[hangame]\r\n" +
+                $"username={p.HangameUsername}\r\n" +
+                $"password={password}\r\n";
+
+            // Write with restrictive intent; the ASI deletes this on load.
+            File.WriteAllText(path, contents);
+        }
         private void WebsiteButton_Click(object sender, RoutedEventArgs e)
         {
             try { 
