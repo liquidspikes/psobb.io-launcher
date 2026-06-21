@@ -41,7 +41,19 @@ namespace PsobbLauncher
         public byte[]? HangameProtectedPassword { get; set; }
 
         public bool HasHangameCredentials =>
-            !string.IsNullOrEmpty(HangameUsername)
-            && HangameProtectedPassword is { Length: > 0 };
+                !string.IsNullOrEmpty(HangameUsername)
+                && HangameProtectedPassword is { Length: > 0 };
+
+        // --- Optional per-profile install isolation ---
+        // Absolute path to this server's install directory (the folder
+        // containing psobb.exe). If null/empty, the launcher falls back to
+        // its own directory (then parent), preserving the original
+        // single-install behavior. Set this to point a server at a separate
+        // install so its data/ folder doesn't collide with other servers.
+        public string? InstallPath { get; set; }
+
+        // True if this profile points at its own isolated install.
+        public bool HasCustomInstallPath =>
+            !string.IsNullOrWhiteSpace(InstallPath);
     }
 }

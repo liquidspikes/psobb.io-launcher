@@ -46,6 +46,23 @@
 			<TextBlock x:Name="HangamePassError" FontSize="10" Foreground="#ff4466"
                        MinHeight="14" TextWrapping="Wrap"/>
 		</StackPanel>
+		<TextBlock Text="Install Path (optional)" FontSize="10" Foreground="#777" Margin="0,8,0,0"/>
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="6"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+			<TextBox Grid.Column="0" x:Name="InstallPathBox"
+                     Watermark="Leave blank = next to launcher"/>
+			<Button Grid.Column="2" Content="Browse…" Click="BrowseInstallPath_Click"
+                    Background="#001428" Foreground="#e0f0ff" BorderBrush="#555" BorderThickness="1"/>
+		</Grid>
+		<TextBlock x:Name="InstallPathError" FontSize="10" Foreground="#ff4466"
+                   MinHeight="14" TextWrapping="Wrap"/>
+		<TextBlock Text="Point a server at its own install so its data/ folder doesn't collide with other servers."
+                   FontSize="9" Foreground="#555" TextWrapping="Wrap"/>
+		
 		<Grid Margin="0,12,0,0">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>

@@ -1,7 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -43,6 +45,9 @@ namespace PsobbLauncher
             var hangameUser = this.FindControl<TextBox>("HangameUserBox");
             if (hangameCheck != null) hangameCheck.IsChecked = p.AuthMode == AuthMode.Hangame;
             if (hangameUser != null) hangameUser.Text = p.HangameUsername;
+
+            var installPathBox = this.FindControl<TextBox>("InstallPathBox");
+            if (installPathBox != null) installPathBox.Text = p.InstallPath ?? "";
         }
 
         private void HangameMode_Changed(object? sender, RoutedEventArgs e)
@@ -52,7 +57,26 @@ namespace PsobbLauncher
             if (panel != null && check != null)
                 panel.IsVisible = check.IsChecked == true;
         }
+        private async void BrowseInstallPath_Click(object? sender, RoutedEventArgs e)
+        {
+            var sp = StorageProvider;
+            if (sp is null)
+                return;
 
+            var folders = await sp.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = "Select the server's install folder (containing psobb.exe)",
+                AllowMultiple = false
+            });
+
+            if (folders.Count > 0)
+            {
+                string? path = folders[0].TryGetLocalPath();
+                var box = this.FindControl<TextBox>("InstallPathBox");
+                if (box != null && !string.IsNullOrEmpty(path))
+                    box.Text = path;
+            }
+        }
         private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(null);
 
         private void Save_Click(object? sender, RoutedEventArgs e)
@@ -66,6 +90,7 @@ namespace PsobbLauncher
             var hangameCheck = this.FindControl<CheckBox>("HangameModeCheck");
             var hangameUser = this.FindControl<TextBox>("HangameUserBox");
             var hangamePass = this.FindControl<TextBox>("HangamePassBox");
+            var installPathBox = this.FindControl<TextBox>("InstallPathBox");
 
             string host = hostBox?.Text?.Trim() ?? "";
             if (string.IsNullOrWhiteSpace(host))
@@ -97,6 +122,24 @@ namespace PsobbLauncher
                     }
                 }
             }
+            // Validate install path: blank is fine (means "use launcher dir").
+            // If set, the folder must actually contain psobb.exe — otherwise
+            // launch would fail (ResolveGameExe treats a custom path as
+            // authoritative with no fallback).
+            string installPath = installPathBox?.Text?.Trim() ?? "";
+            if (installPath.Length > 0)
+            {
+                if (!Directory.Exists(installPath))
+                {
+                    ShowError("InstallPathError", "That folder doesn't exist.");
+                    return;
+                }
+                if (!File.Exists(Path.Combine(installPath, "psobb.exe")))
+                {
+                    ShowError("InstallPathError", "No psobb.exe found in that folder.");
+                    return;
+                }
+            }
 
             int.TryParse(loginPortBox?.Text, out int loginPort);
             int.TryParse(patchPortBox?.Text, out int patchPort);
@@ -110,7 +153,8 @@ namespace PsobbLauncher
             profile.PatchPort = patchPort == 0 ? 11000 : patchPort;
 
             profile.AuthMode = hangameOn ? AuthMode.Hangame : AuthMode.Standard;
-
+            // Empty -> null so "blank" genuinely means "use default location".
+            profile.InstallPath = installPath.Length > 0 ? installPath : null;
             if (hangameOn)
             {
                 profile.HangameUsername = hangameUser?.Text?.Trim() ?? "";
@@ -140,8 +184,10 @@ namespace PsobbLauncher
         {
             var u = this.FindControl<TextBlock>("HangameUserError");
             var p = this.FindControl<TextBlock>("HangamePassError");
+            var i = this.FindControl<TextBlock>("InstallPathError");
             if (u != null) u.Text = "";
             if (p != null) p.Text = "";
+            if (i != null) i.Text = "";
         }
         // --- Hangame credential format rules (from newserv issue #401) ---
         private static bool ValidateHangameUser(string u, out string error)

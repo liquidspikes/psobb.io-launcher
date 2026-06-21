@@ -150,12 +150,23 @@ namespace PsobbLauncher
                 : "No login found. Launch this server and log in once first.";
         }
         /// <summary>
-        /// Locates psobb.exe: launcher's own dir first, then the parent dir.
-        /// Returns the exe path and sets gameDir to its directory, or returns
-        /// null if not found.
+        /// Locates psobb.exe for the given profile. If the profile sets a
+        /// custom InstallPath, that directory is used (and is authoritative —
+        /// no fallback, so a misconfigured path fails clearly). Otherwise
+        /// falls back to the launcher's own dir, then the parent dir.
+        /// Returns the exe path and sets gameDir to its directory, or null
+        /// if not found.
         /// </summary>
-        private static string? ResolveGameExe(out string gameDir)
+        private static string? ResolveGameExe(ServerProfile? profile, out string gameDir)
         {
+            // Per-profile install dir takes precedence when set.
+            if (profile is { HasCustomInstallPath: true })
+            {
+                gameDir = profile.InstallPath!;
+                string customExe = Path.Combine(gameDir, "psobb.exe");
+                return File.Exists(customExe) ? customExe : null;
+            }
+
             string root = AppDomain.CurrentDomain.BaseDirectory;
             gameDir = root;
 
@@ -176,9 +187,17 @@ namespace PsobbLauncher
         {
             try
             {
-                string? exePath = ResolveGameExe(out string root);
+                string? exePath = ResolveGameExe(_selectedServer, out string root);
                 if (exePath is null)
                 {
+                    // Distinguish a misconfigured custom path from a plain
+                    // "no game found" so the user knows what to fix.
+                    if (_selectedServer is { HasCustomInstallPath: true })
+                        StatusText.Text =
+                            $"psobb.exe not found in this profile's install path:\n{_selectedServer.InstallPath}";
+                    else
+                        StatusText.Text = "psobb.exe not found next to the launcher.";
+
                     Debug.WriteLine("psobb.exe not found.");
                     return;
                 }
