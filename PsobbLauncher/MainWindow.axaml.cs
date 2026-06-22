@@ -14,45 +14,43 @@ namespace PsobbLauncher
         public MainWindow()
         {
             InitializeComponent();
-            CheckForGameUpdate();
             InitServers();
         }
-        private void CheckForGameUpdate()
+        /// <summary>
+        /// Applies a dropped-in psobb.pat in the given install directory, if
+        /// present: backs up the current psobb.exe to psobb.exe.bak, then
+        /// promotes psobb.pat -> psobb.exe. Per-install, called at launch-time
+        /// against the selected profile's resolved game dir (see LaunchButton_Click).
+        /// Returns false only if a pat was present but applying it failed, so
+        /// the caller can surface the error and not launch a half-swapped state.
+        /// No pat present => returns true (nothing to do).
+        /// </summary>
+        private static bool ApplyPatchIfPresent(string gameDir, out string? error)
         {
+            error = null;
             try
             {
-                string root = AppDomain.CurrentDomain.BaseDirectory;
-                string patPath = Path.Combine(root, "psobb.pat");
-                string exePath = Path.Combine(root, "psobb.exe");
-                string bakPath = Path.Combine(root, "psobb.exe.bak");
+                string patPath = Path.Combine(gameDir, "psobb.pat");
+                if (!File.Exists(patPath))
+                    return true;  // nothing to apply
 
-                // If pat/exe are not in root, check one folder up
-                if (!File.Exists(patPath) && !File.Exists(exePath))
-                {
-                    string parentDir = Path.GetFullPath(Path.Combine(root, ".."));
-                    patPath = Path.Combine(parentDir, "psobb.pat");
-                    exePath = Path.Combine(parentDir, "psobb.exe");
-                    bakPath = Path.Combine(parentDir, "psobb.exe.bak");
-                }
+                string exePath = Path.Combine(gameDir, "psobb.exe");
+                string bakPath = Path.Combine(gameDir, "psobb.exe.bak");
 
-                if (File.Exists(patPath))
-                {
-                    if (File.Exists(bakPath))
-                    {
-                        File.Delete(bakPath);
-                    }
+                if (File.Exists(bakPath))
+                    File.Delete(bakPath);
 
-                    if (File.Exists(exePath))
-                    {
-                        File.Move(exePath, bakPath);
-                    }
+                if (File.Exists(exePath))
+                    File.Move(exePath, bakPath);
 
-                    File.Move(patPath, exePath);
-                }
+                File.Move(patPath, exePath);
+                return true;
             }
             catch (Exception ex)
             {
+                error = ex.Message;
                 Debug.WriteLine("Failed to apply psobb.pat update: " + ex.Message);
+                return false;
             }
         }
         private readonly ServerStore _store = new();
@@ -190,8 +188,6 @@ namespace PsobbLauncher
                 string? exePath = ResolveGameExe(_selectedServer, out string root);
                 if (exePath is null)
                 {
-                    // Distinguish a misconfigured custom path from a plain
-                    // "no game found" so the user knows what to fix.
                     if (_selectedServer is { HasCustomInstallPath: true })
                         StatusText.Text =
                             $"psobb.exe not found in this profile's install path:\n{_selectedServer.InstallPath}";
@@ -199,6 +195,15 @@ namespace PsobbLauncher
                         StatusText.Text = "psobb.exe not found next to the launcher.";
 
                     Debug.WriteLine("psobb.exe not found.");
+                    return;
+                }
+
+                // Apply a per-install psobb.pat if one was dropped in this
+                // profile's game dir. Abort the launch if the swap fails, so we
+                // never start a half-patched install.
+                if (!ApplyPatchIfPresent(root, out string? patchError))
+                {
+                    StatusText.Text = $"Failed to apply psobb.pat: {patchError}";
                     return;
                 }
 
