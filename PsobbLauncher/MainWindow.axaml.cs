@@ -349,22 +349,15 @@ namespace PsobbLauncher
                 string sourcePath = result[0];
                 try
                 {
-                    string root = AppDomain.CurrentDomain.BaseDirectory;
+                    // Route the team flag into the selected profile's install,
+                    // so flag.bmp lands in the right install for custom-path
+                    // profiles instead of the launcher's own dir.
+                    string root = ResolveGameDir(_selectedServer);
                     string teamFlagDir = Path.Combine(root, "teamflag");
                     
                     if (!Directory.Exists(teamFlagDir))
-                    {
-                        // Fallback to checking parent dir in case we are in bin/Debug/
-                        string parentDir = Path.GetFullPath(Path.Combine(root, "..", "teamflag"));
-                        if (Directory.Exists(Path.GetFullPath(Path.Combine(root, "..", "data"))))
-                        {
-                            teamFlagDir = parentDir;
-                        }
-                    }
-
-                    if (!Directory.Exists(teamFlagDir))
                         Directory.CreateDirectory(teamFlagDir);
-
+              
                     string targetPath = Path.Combine(teamFlagDir, "flag.bmp");
 
                     // Load the image with Avalonia
