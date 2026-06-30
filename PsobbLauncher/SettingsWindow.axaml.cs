@@ -16,21 +16,26 @@ namespace PsobbLauncher
     {
         private const string RegPath = @"Software\SonicTeam\PSOBB";
 
-        public SettingsWindow()
+        private readonly string _gameDir;
+
+        public SettingsWindow() : this(null) { }
+
+        public SettingsWindow(string? gameDir)
         {
             InitializeComponent();
+            _gameDir = gameDir ?? FallbackGameDir();
             LoadSettings();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
                 InitializeGamepad();
-            }
         }
 
-        private string GetGameDirectory()
+        private string GetGameDirectory() => _gameDir;
+
+        private static string FallbackGameDir()
         {
-            string currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            string root = currentDir;
-            if (!File.Exists(Path.Combine(root, "psobb.exe")) && File.Exists(Path.Combine(root, "..", "psobb.exe")))
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            if (!File.Exists(Path.Combine(root, "psobb.exe"))
+                && File.Exists(Path.Combine(root, "..", "psobb.exe")))
                 root = Path.GetFullPath(Path.Combine(root, ".."));
             return root;
         }
@@ -93,7 +98,12 @@ namespace PsobbLauncher
                         }
                     }
 
-                    ComboMode.SelectedIndex = (windowed != 0) ? 1 : 0;
+                    ComboMode.SelectedIndex = windowed switch
+                    {
+                        0 => 0,   // fullscreen
+                        2 => 2,   // virtual fullscreen
+                        _ => 1    // windowed (1, or any unexpected value)
+                    };
 
                     if (width > 0 && height > 0)
                     {

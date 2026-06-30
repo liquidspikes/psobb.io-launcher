@@ -181,6 +181,23 @@ namespace PsobbLauncher
 
             return null;
         }
+        /// <summary>
+        /// Resolves the game directory for a profile, mirroring ResolveGameExe's
+        /// precedence but WITHOUT requiring psobb.exe to exist — settings may be
+        /// edited before the exe is confirmed. Used to point SettingsWindow at
+        /// the correct per-install config location.
+        /// </summary>
+        private static string ResolveGameDir(ServerProfile? profile)
+        {
+            if (profile is { HasCustomInstallPath: true })
+                return profile.InstallPath!;
+
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            if (!File.Exists(Path.Combine(root, "psobb.exe"))
+                && File.Exists(Path.Combine(root, "..", "psobb.exe")))
+                root = Path.GetFullPath(Path.Combine(root, ".."));
+            return root;
+        }
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -259,7 +276,8 @@ namespace PsobbLauncher
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settings = new SettingsWindow();
+            string gameDir = ResolveGameDir(_selectedServer);
+            SettingsWindow settings = new SettingsWindow(gameDir);
             settings.ShowDialog(this);
         }
         private static void WriteHangameHandoff(string gameDir, ServerProfile p)
