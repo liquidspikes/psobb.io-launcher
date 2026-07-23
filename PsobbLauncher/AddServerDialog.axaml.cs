@@ -85,6 +85,8 @@ namespace PsobbLauncher
 
             var nameBox = this.FindControl<TextBox>("NameBox");
             var hostBox = this.FindControl<TextBox>("HostBox");
+            var h = this.FindControl<TextBlock>("HostError");
+            if (h != null) h.Text = "";
             var loginPortBox = this.FindControl<TextBox>("LoginPortBox");
             var patchPortBox = this.FindControl<TextBox>("PatchPortBox");
             var hangameCheck = this.FindControl<CheckBox>("HangameModeCheck");
@@ -94,7 +96,10 @@ namespace PsobbLauncher
 
             string host = hostBox?.Text?.Trim() ?? "";
             if (string.IsNullOrWhiteSpace(host))
+            {
+                ShowError("HostError", "Server address is required.");
                 return;
+            }
 
             bool hangameOn = hangameCheck?.IsChecked == true;
 

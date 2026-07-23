@@ -14,6 +14,8 @@
 
 		<TextBlock Text="Server Address (host)" FontSize="10" Foreground="#777"/>
 		<TextBox x:Name="HostBox" Watermark="192.168.0.56"/>
+		<TextBlock x:Name="HostError" FontSize="10" Foreground="#ff4466"
+				   MinHeight="14" TextWrapping="Wrap"/>
 
 		<Grid Margin="0,4,0,0">
 			<Grid.ColumnDefinitions>
