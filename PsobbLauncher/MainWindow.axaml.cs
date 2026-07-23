@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace PsobbLauncher
 {
@@ -13,68 +14,240 @@ namespace PsobbLauncher
         public MainWindow()
         {
             InitializeComponent();
-            CheckForGameUpdate();
+            InitServers();
         }
-
-        private void CheckForGameUpdate()
+        /// <summary>
+        /// Applies a dropped-in psobb.pat in the given install directory, if
+        /// present: backs up the current psobb.exe to psobb.exe.bak, then
+        /// promotes psobb.pat -> psobb.exe. Per-install, called at launch-time
+        /// against the selected profile's resolved game dir (see LaunchButton_Click).
+        /// Returns false only if a pat was present but applying it failed, so
+        /// the caller can surface the error and not launch a half-swapped state.
+        /// No pat present => returns true (nothing to do).
+        /// </summary>
+        private static bool ApplyPatchIfPresent(string gameDir, out string? error)
         {
+            error = null;
             try
             {
-                string root = AppDomain.CurrentDomain.BaseDirectory;
-                string patPath = Path.Combine(root, "psobb.pat");
-                string exePath = Path.Combine(root, "psobb.exe");
-                string bakPath = Path.Combine(root, "psobb.exe.bak");
+                string patPath = Path.Combine(gameDir, "psobb.pat");
+                if (!File.Exists(patPath))
+                    return true;  // nothing to apply
 
-                // If pat/exe are not in root, check one folder up
-                if (!File.Exists(patPath) && !File.Exists(exePath))
-                {
-                    string parentDir = Path.GetFullPath(Path.Combine(root, ".."));
-                    patPath = Path.Combine(parentDir, "psobb.pat");
-                    exePath = Path.Combine(parentDir, "psobb.exe");
-                    bakPath = Path.Combine(parentDir, "psobb.exe.bak");
-                }
+                string exePath = Path.Combine(gameDir, "psobb.exe");
+                string bakPath = Path.Combine(gameDir, "psobb.exe.bak");
 
-                if (File.Exists(patPath))
-                {
-                    if (File.Exists(bakPath))
-                    {
-                        File.Delete(bakPath);
-                    }
+                if (File.Exists(bakPath))
+                    File.Delete(bakPath);
 
-                    if (File.Exists(exePath))
-                    {
-                        File.Move(exePath, bakPath);
-                    }
+                if (File.Exists(exePath))
+                    File.Move(exePath, bakPath);
 
-                    File.Move(patPath, exePath);
-                }
+                File.Move(patPath, exePath);
+                return true;
             }
             catch (Exception ex)
             {
+                error = ex.Message;
                 Debug.WriteLine("Failed to apply psobb.pat update: " + ex.Message);
+                return false;
             }
         }
+        private readonly ServerStore _store = new();
+        private CaptureService? _capture;
+        private ServerProfile? _selectedServer;
 
+        private void InitServers()
+        {
+            _store.Load();
+            _store.SeedDefaultsIfFirstRun();
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                _capture = new CaptureService(_store);
+
+            RefreshServerCombo();
+        }
+
+        private void RefreshServerCombo()
+        {
+            ServerCombo.ItemsSource = _store.Servers.Select(s => s.Name).ToList();
+
+            if (_store.Servers.Count > 0)
+                ServerCombo.SelectedIndex = 0;
+        }
+
+        private void ServerCombo_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            int idx = ServerCombo.SelectedIndex;
+            _selectedServer = (idx >= 0 && idx < _store.Servers.Count)
+                ? _store.Servers[idx]
+                : null;
+        }
+
+        private async void AddServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            var dlg = new AddServerDialog();
+            var profile = await dlg.ShowDialog<ServerProfile?>(this);
+            if (profile is null)
+                return;
+
+            _store.AddOrUpdate(profile);
+            RefreshServerCombo();
+            ServerCombo.SelectedIndex = _store.Servers.FindIndex(s => s.Id == profile.Id);
+            StatusText.Text = $"Added server: {profile.Name}";
+        }
+        private async void EditServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server to edit.";
+                return;
+            }
+
+            var dlg = new AddServerDialog(_selectedServer);
+            var result = await dlg.ShowDialog<ServerProfile?>(this);
+            if (result is null)
+                return;
+
+            _store.AddOrUpdate(result); // same Id, so updates in place
+            RefreshServerCombo();
+            ServerCombo.SelectedIndex = _store.Servers.FindIndex(s => s.Id == result.Id);
+            StatusText.Text = $"Updated server: {result.Name}";
+        }
+
+        private void DeleteServerButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server to delete.";
+                return;
+            }
+
+            string name = _selectedServer.Name;
+            _store.Remove(_selectedServer.Id);
+            _selectedServer = null;
+            RefreshServerCombo();
+            StatusText.Text = $"Deleted server: {name}";
+        }
+        private void CaptureButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                StatusText.Text = "Credential capture is Windows-only.";
+                return;
+            }
+            if (_selectedServer is null)
+            {
+                StatusText.Text = "Select a server first.";
+                return;
+            }
+
+            bool ok = _capture!.CaptureCurrentLogin(_selectedServer);
+            StatusText.Text = ok
+                ? $"Captured login for {_selectedServer.Name}."
+                : "No login found. Launch this server and log in once first.";
+        }
+        /// <summary>
+        /// Locates psobb.exe for the given profile. If the profile sets a
+        /// custom InstallPath, that directory is used (and is authoritative —
+        /// no fallback, so a misconfigured path fails clearly). Otherwise
+        /// falls back to the launcher's own dir, then the parent dir.
+        /// Returns the exe path and sets gameDir to its directory, or null
+        /// if not found.
+        /// </summary>
+        private static string? ResolveGameExe(ServerProfile? profile, out string gameDir)
+        {
+            // Per-profile install dir takes precedence when set.
+            if (profile is { HasCustomInstallPath: true })
+            {
+                gameDir = profile.InstallPath!;
+                string customExe = Path.Combine(gameDir, "psobb.exe");
+                return File.Exists(customExe) ? customExe : null;
+            }
+
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            gameDir = root;
+
+            string exePath = Path.Combine(root, "psobb.exe");
+            if (File.Exists(exePath))
+                return exePath;
+
+            string parentExe = Path.GetFullPath(Path.Combine(root, "..", "psobb.exe"));
+            if (File.Exists(parentExe))
+            {
+                gameDir = Path.GetDirectoryName(parentExe) ?? root;
+                return parentExe;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Resolves the game directory for a profile, mirroring ResolveGameExe's
+        /// precedence but WITHOUT requiring psobb.exe to exist — settings may be
+        /// edited before the exe is confirmed. Used to point SettingsWindow at
+        /// the correct per-install config location.
+        /// </summary>
+        private static string ResolveGameDir(ServerProfile? profile)
+        {
+            if (profile is { HasCustomInstallPath: true })
+                return profile.InstallPath!;
+
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            if (!File.Exists(Path.Combine(root, "psobb.exe"))
+                && File.Exists(Path.Combine(root, "..", "psobb.exe")))
+                root = Path.GetFullPath(Path.Combine(root, ".."));
+            return root;
+        }
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string root = AppDomain.CurrentDomain.BaseDirectory;
-                string exePath = Path.Combine(root, "psobb.exe");
-                
-                if (!File.Exists(exePath)) {
-                    string parentExe = Path.GetFullPath(Path.Combine(root, "..", "psobb.exe"));
-                    if (File.Exists(parentExe)) {
-                        exePath = parentExe;
-                        root = Path.GetDirectoryName(exePath);
-                    }
+                string? exePath = ResolveGameExe(_selectedServer, out string root);
+                if (exePath is null)
+                {
+                    if (_selectedServer is { HasCustomInstallPath: true })
+                        StatusText.Text =
+                            $"psobb.exe not found in this profile's install path:\n{_selectedServer.InstallPath}";
+                    else
+                        StatusText.Text = "psobb.exe not found next to the launcher.";
+
+                    Debug.WriteLine("psobb.exe not found.");
+                    return;
+                }
+
+                // Apply a per-install psobb.pat if one was dropped in this
+                // profile's game dir. Abort the launch if the swap fails, so we
+                // never start a half-patched install.
+                if (!ApplyPatchIfPresent(root, out string? patchError))
+                {
+                    StatusText.Text = $"Failed to apply psobb.pat: {patchError}";
+                    return;
                 }
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Force WINDOW_MODE=1 in registry so the game launches in windowed mode
-                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\SonicTeam\PSOBB")) {
+                    // Force WINDOW_MODE=1 in registry so the game launches windowed
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\SonicTeam\PSOBB"))
+                    {
                         if (key != null) key.SetValue("WINDOW_MODE", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                    }
+
+                    // Write the selected server's psobb.cfg for either path.
+                    if (_selectedServer != null)
+                    {
+                        PsobbConfig.WriteForProfile(root, _selectedServer);
+
+                        if (_selectedServer.AuthMode == AuthMode.Hangame)
+                        {
+                            // Hangame path: bypass the registry entirely. Drop creds for
+                            // the ASI to consume; the ASI deletes the file on load.
+                            WriteHangameHandoff(root, _selectedServer);
+                        }
+                        else
+                        {
+                            // Standard path: registry capture-replay, unchanged.
+                            _capture?.ApplyCredentials(_selectedServer);
+                        }
                     }
 
                     ProcessStartInfo psi = new ProcessStartInfo(exePath);
@@ -89,7 +262,7 @@ namespace PsobbLauncher
                     psi.WorkingDirectory = root;
                     Process.Start(psi);
                 }
-                
+
                 if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
                 {
                     desktop.Shutdown();
@@ -103,10 +276,31 @@ namespace PsobbLauncher
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settings = new SettingsWindow();
+            string gameDir = ResolveGameDir(_selectedServer);
+            SettingsWindow settings = new SettingsWindow(gameDir);
             settings.ShowDialog(this);
         }
+        private static void WriteHangameHandoff(string gameDir, ServerProfile p)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return;
+            if (p.HangameProtectedPassword is not { Length: > 0 })
+                return;
 
+            // Decrypt only at the moment of launch; keep the plaintext window tight.
+            byte[] plain = CredentialProtector.Unprotect(p.HangameProtectedPassword);
+            string password = System.Text.Encoding.UTF8.GetString(plain);
+            Array.Clear(plain, 0, plain.Length);
+
+            string path = Path.Combine(gameDir, "hangame.ini");
+            string contents =
+                "[hangame]\r\n" +
+                $"username={p.HangameUsername}\r\n" +
+                $"password={password}\r\n";
+
+            // Write with restrictive intent; the ASI deletes this on load.
+            File.WriteAllText(path, contents);
+        }
         private void WebsiteButton_Click(object sender, RoutedEventArgs e)
         {
             try { 
@@ -155,22 +349,15 @@ namespace PsobbLauncher
                 string sourcePath = result[0];
                 try
                 {
-                    string root = AppDomain.CurrentDomain.BaseDirectory;
+                    // Route the team flag into the selected profile's install,
+                    // so flag.bmp lands in the right install for custom-path
+                    // profiles instead of the launcher's own dir.
+                    string root = ResolveGameDir(_selectedServer);
                     string teamFlagDir = Path.Combine(root, "teamflag");
                     
                     if (!Directory.Exists(teamFlagDir))
-                    {
-                        // Fallback to checking parent dir in case we are in bin/Debug/
-                        string parentDir = Path.GetFullPath(Path.Combine(root, "..", "teamflag"));
-                        if (Directory.Exists(Path.GetFullPath(Path.Combine(root, "..", "data"))))
-                        {
-                            teamFlagDir = parentDir;
-                        }
-                    }
-
-                    if (!Directory.Exists(teamFlagDir))
                         Directory.CreateDirectory(teamFlagDir);
-
+              
                     string targetPath = Path.Combine(teamFlagDir, "flag.bmp");
 
                     // Load the image with Avalonia
@@ -248,5 +435,6 @@ namespace PsobbLauncher
                 desktop.Shutdown();
             }
         }
+       
     }
 }

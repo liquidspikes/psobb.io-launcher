@@ -33,11 +33,53 @@
                 <Button Content="X" HorizontalAlignment="Right" Width="40" Background="Transparent" Foreground="#888" BorderThickness="0" FontSize="16" Click="CloseButton_Click" />
             </Border>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,30,0,0">
-                <TextBlock Text="PSOBB.IO" FontSize="28" FontWeight="Bold" Foreground="#00ffff" />
-                <TextBlock Text="PHANTASY STAR ONLINE BLUE BURST" FontSize="10" Foreground="#777" Margin="2,0,0,0"/>
-            </StackPanel>
+			<!-- Header + Server Selector -->
+			<StackPanel Grid.Row="0" Margin="0,30,0,0">
+				<TextBlock Text="PSOBB.IO" FontSize="28" FontWeight="Bold" Foreground="#00ffff" />
+				<TextBlock Text="PHANTASY STAR ONLINE BLUE BURST" FontSize="10" Foreground="#777" Margin="2,0,0,0"/>
+
+				<TextBlock Text="SERVER" FontSize="10" Foreground="#777" Margin="2,20,0,4"/>
+				<ComboBox x:Name="ServerCombo"
+                          HorizontalAlignment="Stretch"
+                          Background="#001428" Foreground="#e0f0ff"
+                          BorderBrush="#00ffff" BorderThickness="1"
+                          SelectionChanged="ServerCombo_SelectionChanged"/>
+
+				<Grid Margin="0,8,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="8"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="8"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+
+					<Button Grid.Column="0" Content="ADD" FontSize="11" Height="34"
+                            Background="#001428" Foreground="#e0f0ff"
+                            BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5"
+                            Click="AddServerButton_Click"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+					<Button Grid.Column="2" Content="EDIT" FontSize="11" Height="34"
+                            Background="#001428" Foreground="#e0f0ff"
+                            BorderBrush="#00ffff" BorderThickness="1" CornerRadius="5"
+                            Click="EditServerButton_Click"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+					<Button Grid.Column="4" Content="DELETE" FontSize="11" Height="34"
+                            Background="#001428" Foreground="#e0f0ff"
+                            BorderBrush="#ff4466" BorderThickness="1" CornerRadius="5"
+                            Click="DeleteServerButton_Click"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+				</Grid>
+
+				<Button Content="CAPTURE LOGIN" FontSize="11" Height="34" Margin="0,8,0,0"
+                        Background="#001428" Foreground="#e0f0ff"
+                        BorderBrush="#ffaa00" BorderThickness="1" CornerRadius="5"
+                        Click="CaptureButton_Click"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+
+				<TextBlock x:Name="StatusText" FontSize="10" Foreground="#00ff88"
+                           Margin="2,8,0,0" TextWrapping="Wrap"/>
+			</StackPanel>
 
             <!-- Buttons -->
             <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
